@@ -1,0 +1,100 @@
+# ============================================================
+# PREPROCESSING
+# ============================================================
+
+preprocessing:
+  # Columnas a eliminar antes de cualquier procesamiento
+  columns_to_drop:
+    - "Cabin"
+    - "Ticket"
+    - "Name"
+
+  # Estrategia de imputación por columna
+  imputation:
+    Age:
+      strategy: "median"
+    Embarked:
+      strategy: "most_frequent"
+    Fare:
+      strategy: "median"
+
+  # Columnas categóricas a encodear con OrdinalEncoder
+  categorical_columns:
+    - "Sex"
+    - "Embarked"
+
+
+# ============================================================
+# FEATURE ENGINEERING
+# ============================================================
+
+feature_engineering:
+  # Feature: tamaño del grupo familiar
+  family_size:
+    enabled: true
+
+  # Feature: si viaja solo
+  is_alone:
+    enabled: true
+
+  # Feature: título extraído del nombre original
+  # (se procesa antes del drop de "Name" en un nodo separado)
+  title:
+    enabled: true
+    rare_threshold: 10  # títulos con menos ocurrencias → "Rare"
+
+  # Columnas finales que entran al modelo (en este orden)
+  feature_columns:
+    - "Pclass"
+    - "Sex"
+    - "Age"
+    - "SibSp"
+    - "Parch"
+    - "Fare"
+    - "Embarked"
+    - "FamilySize"
+    - "IsAlone"
+
+  target_column: "Survived"
+  id_column: "PassengerId"
+
+
+# ============================================================
+# MODEL TRAINING
+# ============================================================
+
+model_training:
+  # Reproducibilidad
+  random_state: 42
+
+  # Split train/validación
+  test_size: 0.2
+
+  # Hiperparámetros XGBoost 1.5.8
+  xgboost:
+    n_estimators: 300
+    max_depth: 5
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 3
+    gamma: 0.1
+    reg_alpha: 0.1
+    reg_lambda: 1.0
+    objective: "binary:logistic"
+    eval_metric: "logloss"
+    use_label_encoder: false
+    verbosity: 0
+    random_state: 42
+
+  # Early stopping (basado en validación)
+  early_stopping_rounds: 30
+
+
+# ============================================================
+# INFERENCE
+# ============================================================
+
+inference:
+  # Umbral de clasificación para convertir probabilidad → clase
+  threshold: 0.5

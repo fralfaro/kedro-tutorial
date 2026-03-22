@@ -1,0 +1,38 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  rich:
+    format: "%(message)s"
+    datefmt: "[%X]"
+
+handlers:
+  console:
+    class: rich.logging.RichHandler
+    level: INFO
+    formatter: rich
+    rich_tracebacks: true
+
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: simple
+    filename: logs/kedro.log
+    mode: w
+
+root:
+  level: INFO
+  handlers: [console]
+
+loggers:
+  kedro:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+
+  titanic_kedro:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: false

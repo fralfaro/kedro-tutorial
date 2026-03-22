@@ -1,0 +1,132 @@
+# ============================================================
+# CREDENTIALS (referencia al bloque 'kaggle' en credentials.yml)
+# Kedro expone credenciales con el prefijo credentials:
+# Uso en pipeline: inputs="credentials:kaggle"
+# ============================================================
+
+# (no se define entrada en el catalog — Kedro las resuelve
+#  automáticamente desde conf/local/credentials.yml)
+
+# ============================================================
+# NOTA: los datasets "train_raw_validated" y "test_raw_validated"
+# son outputs de data_ingestion e inputs de preprocessing.
+# Al no estar definidos aquí, Kedro los trata como MemoryDataset
+# (solo viven en RAM durante la ejecución del pipeline).
+# Si quisieras persistirlos, agrégalos como ParquetDataset en 01_raw.
+# ============================================================
+
+# ============================================================
+# DATA LAYER 01 — RAW
+# Datos originales sin modificar. Nunca se sobreescriben.
+# ============================================================
+
+train_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/train.csv
+  load_args:
+    sep: ","
+    encoding: "utf-8"
+
+test_raw:
+  type: pandas.CSVDataset
+  filepath: data/01_raw/test.csv
+  load_args:
+    sep: ","
+    encoding: "utf-8"
+
+
+# ============================================================
+# DATA LAYER 02 — INTERMEDIATE
+# Datos después de limpieza y preprocesamiento.
+# ============================================================
+
+train_preprocessed:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/train_preprocessed.parquet
+
+test_preprocessed:
+  type: pandas.ParquetDataset
+  filepath: data/02_intermediate/test_preprocessed.parquet
+
+
+# ============================================================
+# DATA LAYER 03 — PRIMARY
+# Datos con features engineerizadas, listos para modelar.
+# ============================================================
+
+train_featured:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/train_featured.parquet
+
+train_target:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/train_target.parquet
+
+test_featured:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/test_featured.parquet
+
+
+# ============================================================
+# DATA LAYER 04 — MODEL INPUT
+# Splits de entrenamiento y validación.
+# ============================================================
+
+X_train:
+  type: pandas.ParquetDataset
+  filepath: data/04_model_input/X_train.parquet
+
+X_val:
+  type: pandas.ParquetDataset
+  filepath: data/04_model_input/X_val.parquet
+
+y_train:
+  type: pandas.ParquetDataset
+  filepath: data/04_model_input/y_train.parquet
+
+y_val:
+  type: pandas.ParquetDataset
+  filepath: data/04_model_input/y_val.parquet
+
+
+# ============================================================
+# DATA LAYER 05 — MODELS
+# Modelo entrenado serializado como JSON (XGBoost nativo).
+# ============================================================
+
+xgboost_model:
+  type: pickle.PickleDataset
+  filepath: data/05_models/xgboost_model.pkl
+  backend: joblib
+
+
+# ============================================================
+# DATA LAYER 06 — MODEL OUTPUT
+# Predicciones crudas sobre el dataset de test.
+# ============================================================
+
+test_predictions:
+  type: pandas.ParquetDataset
+  filepath: data/06_model_output/test_predictions.parquet
+
+
+# ============================================================
+# DATA LAYER 07 — REPORTING
+# Archivos finales: submission y métricas de evaluación.
+# ============================================================
+
+submission:
+  type: pandas.CSVDataset
+  filepath: data/07_reporting/submission.csv
+  save_args:
+    index: false
+
+metrics:
+  type: tracking.MetricsDataset
+  filepath: data/07_reporting/metrics.json
+
+evaluation_report:
+  type: pandas.CSVDataset
+  filepath: data/07_reporting/evaluation_report.csv
+  save_args:
+    index: false
