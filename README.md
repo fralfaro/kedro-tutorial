@@ -32,8 +32,7 @@ uv venv
 source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
-uv pip install poetry
-uv run poetry install
+uv sync --extra dev
 ```
 
 ## Datos
